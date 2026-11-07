@@ -179,7 +179,14 @@ jobs:
                       Spacer(Modifier.height(28.dp))
                       HorizontalDivider(color = Gold)
                       Spacer(Modifier.height(12.dp))
-                      Text("وب‌سایت: www.safarlandalborz.com", color = Ink, modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center)
+                      Text("راه‌های ارتباط با سفرلندالبرز", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = Ink, modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center)
+                      Spacer(Modifier.height(8.dp))
+                      Text("تماس: 09059223741", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Ink, modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center)
+                      Text("تماس: 09190476308", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Ink, modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center)
+                      Text("وب‌سایت: safarlandalborz.com", color = Ink, modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center)
+                      Text("اینستاگرام: @safarlandalborz", color = Ink, modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center)
+                      Text("مدیریت: محمد خزائی", color = Ink, modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center)
+                      Spacer(Modifier.height(8.dp))
                       Text("سفر مطمئن، انتخاب هوشمندانه", color = Gold, modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center)
                   }
               }
