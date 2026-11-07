@@ -9,9 +9,13 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
       - name: Create Android project
         run: |
-          mkdir -p app/src/main/java/com/safarland/alborz app/src/main/res/values app/src/main/res/drawable
+          mkdir -p app/src/main/java/com/safarland/alborz app/src/main/res/values app/src/main/res/drawable app/src/main/res/drawable-nodpi
+          cp app/src/main/res/drawable-nodpi/safarland_icon.jpg app/src/main/res/drawable-nodpi/safarland_icon.jpg.tmp
+          mv app/src/main/res/drawable-nodpi/safarland_icon.jpg.tmp app/src/main/res/drawable-nodpi/safarland_icon.jpg
 
           cat > app/src/main/res/drawable/safarland_logo.xml <<'XML'
           <vector xmlns:android="http://schemas.android.com/apk/res/android"
@@ -86,7 +90,7 @@ jobs:
           GRADLE
           cat > app/src/main/AndroidManifest.xml <<'XML'
           <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-              <application android:theme="@android:style/Theme.Material.Light.NoActionBar" android:label="سفرلندالبرز" android:icon="@drawable/safarland_logo" android:usesCleartextTraffic="false">
+              <application android:theme="@android:style/Theme.Material.Light.NoActionBar" android:label="سفرلندالبرز" android:icon="@drawable/safarland_icon" android:usesCleartextTraffic="false">
                   <activity android:name=".MainActivity" android:exported="true">
                       <intent-filter>
                           <action android:name="android.intent.action.MAIN" />
@@ -141,7 +145,7 @@ jobs:
               var adminPrice by remember { mutableStateOf("") }
               MaterialTheme(colorScheme = lightColorScheme(primary = Ink, secondary = Gold, background = Cream)) {
                   Column(Modifier.fillMaxSize().background(Cream).verticalScroll(rememberScrollState()).padding(20.dp)) {
-                      Image(painter = painterResource(R.drawable.safarland_logo), contentDescription = "لوگوی اصلی سفرلندالبرز", modifier = Modifier.size(132.dp).align(Alignment.CenterHorizontally))
+                      Image(painter = painterResource(R.drawable.safarland_icon), contentDescription = "لوگوی اصلی سفرلندالبرز", modifier = Modifier.size(132.dp).align(Alignment.CenterHorizontally))
                       Spacer(Modifier.height(8.dp))
                       Text("سفرلندالبرز", fontSize = 29.sp, fontWeight = FontWeight.Bold, color = Ink, modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center)
                       Text("تاکسی اینترنتی بین‌شهری", color = Gold, modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center)
