@@ -104,12 +104,15 @@ jobs:
           package com.safarland.alborz
 
           import android.os.Bundle
+          import android.content.Context
+          import java.security.MessageDigest
           import androidx.activity.ComponentActivity
           import androidx.activity.compose.setContent
           import androidx.compose.foundation.background
           import androidx.compose.foundation.layout.*
           import androidx.compose.foundation.Image
           import androidx.compose.ui.res.painterResource
+          import androidx.compose.ui.platform.LocalContext
           import androidx.compose.foundation.rememberScrollState
           import androidx.compose.foundation.verticalScroll
           import androidx.compose.material3.*
@@ -135,7 +138,16 @@ jobs:
 
           @Composable
           fun SafarlandApp() {
+              val context = LocalContext.current
+              val adminPrefs = remember { context.getSharedPreferences("safarland_admin", Context.MODE_PRIVATE) }
               var page by remember { mutableStateOf("passenger") }
+              var adminLoggedIn by remember { mutableStateOf(false) }
+              var adminUsername by remember { mutableStateOf("") }
+              var adminPassword by remember { mutableStateOf("") }
+              var newAdminPassword by remember { mutableStateOf("") }
+              var confirmAdminPassword by remember { mutableStateOf("") }
+              var adminMessage by remember { mutableStateOf("") }
+              val adminPasswordConfigured = adminPrefs.contains("password_hash")
               var origin by remember { mutableStateOf("") }
               var destination by remember { mutableStateOf("") }
               var date by remember { mutableStateOf("") }
@@ -152,7 +164,12 @@ jobs:
                       Spacer(Modifier.height(22.dp))
                       Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                           Button(onClick = { page = "passenger" }, modifier = Modifier.weight(1f), colors = ButtonDefaults.buttonColors(containerColor = if (page == "passenger") Ink else Color.LightGray)) { Text("مسافران") }
-                          Button(onClick = { page = "admin" }, modifier = Modifier.weight(1f), colors = ButtonDefaults.buttonColors(containerColor = if (page == "admin") Ink else Color.LightGray)) { Text("مدیریت") }
+                          Button(onClick = {
+                              adminUsername = ""
+                              adminPassword = ""
+                              adminMessage = ""
+                              page = if (adminPasswordConfigured) "admin_login" else "admin_setup"
+                          }, modifier = Modifier.weight(1f), colors = ButtonDefaults.buttonColors(containerColor = if (page.startsWith("admin")) Ink else Color.LightGray)) { Text("مدیریت") }
                       }
                       Spacer(Modifier.height(18.dp))
                       if (page == "passenger") {
@@ -170,11 +187,56 @@ jobs:
                           }
                           Button(onClick = { submitted = true }, modifier = Modifier.fillMaxWidth(), colors = ButtonDefaults.buttonColors(containerColor = Gold)) { Text("ثبت درخواست سفر", color = Ink) }
                           if (submitted) Text("درخواست شما در این نسخه نمایشی ثبت محلی نشده است. برای دریافت سفر، سامانه باید به سرور متصل شود.", color = Ink)
+                      } else if (page == "admin_setup") {
+                          Text("راه‌اندازی رمز مدیر", fontSize = 22.sp, fontWeight = FontWeight.Bold, color = Ink)
+                          Text("نام کاربری مدیر: Mohammad", color = Ink)
+                          OutlinedTextField(newAdminPassword, { newAdminPassword = it }, label = { Text("رمز عبور جدید (حداقل ۸ کاراکتر)") }, modifier = Modifier.fillMaxWidth())
+                          OutlinedTextField(confirmAdminPassword, { confirmAdminPassword = it }, label = { Text("تکرار رمز عبور") }, modifier = Modifier.fillMaxWidth())
+                          Button(onClick = {
+                              if (newAdminPassword.length < 8) {
+                                  adminMessage = "رمز عبور باید حداقل ۸ کاراکتر باشد."
+                              } else if (newAdminPassword != confirmAdminPassword) {
+                                  adminMessage = "تکرار رمز عبور مطابقت ندارد."
+                              } else {
+                                  val digest = MessageDigest.getInstance("SHA-256").digest(newAdminPassword.toByteArray())
+                                  val hash = digest.joinToString("") { "%02x".format(it) }
+                                  adminPrefs.edit().putString("password_hash", hash).apply()
+                                  newAdminPassword = ""
+                                  confirmAdminPassword = ""
+                                  adminMessage = "رمز مدیر تنظیم شد. اکنون وارد شوید."
+                                  page = "admin_login"
+                              }
+                          }, modifier = Modifier.fillMaxWidth(), colors = ButtonDefaults.buttonColors(containerColor = Gold)) { Text("ثبت رمز مدیر", color = Ink) }
+                          if (adminMessage.isNotBlank()) Text(adminMessage, color = Ink)
+                          Text("این قفل فقط روی همین گوشی ذخیره می‌شود و جایگزین احراز هویت امنِ سروری نیست.", color = Color.DarkGray, fontSize = 12.sp)
+                      } else if (page == "admin_login") {
+                          Text("ورود مدیر", fontSize = 22.sp, fontWeight = FontWeight.Bold, color = Ink)
+                          OutlinedTextField(adminUsername, { adminUsername = it }, label = { Text("نام کاربری") }, modifier = Modifier.fillMaxWidth())
+                          OutlinedTextField(adminPassword, { adminPassword = it }, label = { Text("رمز عبور") }, modifier = Modifier.fillMaxWidth())
+                          Button(onClick = {
+                              val digest = MessageDigest.getInstance("SHA-256").digest(adminPassword.toByteArray())
+                              val hash = digest.joinToString("") { "%02x".format(it) }
+                              val savedHash = adminPrefs.getString("password_hash", null)
+                              if (adminUsername == "Mohammad" && savedHash != null && hash == savedHash) {
+                                  adminLoggedIn = true
+                                  adminPassword = ""
+                                  adminMessage = ""
+                                  page = "admin"
+                              } else {
+                                  adminMessage = "نام کاربری یا رمز عبور اشتباه است."
+                              }
+                          }, modifier = Modifier.fillMaxWidth(), colors = ButtonDefaults.buttonColors(containerColor = Gold)) { Text("ورود به پنل مدیریت", color = Ink) }
+                          if (adminMessage.isNotBlank()) Text(adminMessage, color = Color.Red)
                       } else {
                           Text("پنل مدیریت", fontSize = 22.sp, fontWeight = FontWeight.Bold, color = Ink)
-                          Text("قیمت سفر توسط مدیر تعیین می‌شود.")
+                          Text("خوش آمدید، مدیر سفرلندالبرز.", color = Ink)
                           OutlinedTextField(adminPrice, { adminPrice = it }, label = { Text("قیمت پیشنهادی سفر (تومان)") }, modifier = Modifier.fillMaxWidth())
-                          Text("این صفحه فعلاً نمایشی است و ورود امن مدیر و ذخیره درخواست‌ها هنوز پیاده‌سازی نشده است.", color = Color.DarkGray)
+                          Button(onClick = {
+                              adminLoggedIn = false
+                              page = "passenger"
+                              adminPrice = ""
+                          }, modifier = Modifier.fillMaxWidth()) { Text("خروج از پنل مدیریت") }
+                          Text("توجه: این ورود محلی است؛ برای محافظت واقعی و مدیریت درخواست‌های سفر از چند دستگاه، اتصال به سرور لازم است.", color = Color.DarkGray, fontSize = 12.sp)
                       }
                       Spacer(Modifier.height(28.dp))
                       HorizontalDivider(color = Gold)
