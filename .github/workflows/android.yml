@@ -11,7 +11,26 @@ jobs:
     steps:
       - name: Create Android project
         run: |
-          mkdir -p app/src/main/java/com/safarland/alborz app/src/main/res/values
+          mkdir -p app/src/main/java/com/safarland/alborz app/src/main/res/values app/src/main/res/drawable
+
+          cat > app/src/main/res/drawable/safarland_logo.xml <<'XML'
+          <vector xmlns:android="http://schemas.android.com/apk/res/android"
+              android:width="512dp" android:height="512dp"
+              android:viewportWidth="512" android:viewportHeight="512">
+              <path android:fillColor="#171717" android:pathData="M0,0h512v512h-512z"/>
+              <path android:fillColor="#C6A45A" android:pathData="M256,18a238,238 0,1 0,0 476a238,238 0,1 0,0 -476M256,40a216,216 0,1 1,0 432a216,216 0,1 1,0 -432"/>
+              <path android:fillColor="#C6A45A" android:pathData="M65,302L175,158l54,66 47,-56 171,190H65z"/>
+              <path android:fillColor="#171717" android:pathData="M110,330L176,242l52,62 48,-57 124,83H110z"/>
+              <path android:fillColor="#F8F6F0" android:pathData="M250,115L272,115 253,198 304,252 282,270 224,210z"/>
+              <path android:fillColor="#C6A45A" android:pathData="M235,191L278,224 306,260 285,277 260,246 215,214z"/>
+              <path android:fillColor="#F8F6F0" android:pathData="M110,352L402,352 402,370 110,370z"/>
+              <path android:fillColor="#C6A45A" android:pathData="M145,382h222v16h-222z"/>
+              <path android:fillColor="#C6A45A" android:pathData="M174,300h164l30,42H144z"/>
+              <path android:fillColor="#171717" android:pathData="M190,309h132l18,24H172z"/>
+              <path android:fillColor="#C6A45A" android:pathData="M205,344a18,18 0,1 0,36 0a18,18 0,1 0,-36 0M282,344a18,18 0,1 0,36 0a18,18 0,1 0,-36 0"/>
+              <path android:fillColor="#171717" android:pathData="M213,344a10,10 0,1 0,20 0a10,10 0,1 0,-20 0M290,344a10,10 0,1 0,20 0a10,10 0,1 0,-20 0"/>
+          </vector>
+          XML
           cat > settings.gradle.kts <<'GRADLE'
           pluginManagement { repositories { google(); mavenCentral(); gradlePluginPortal() } }
           dependencyResolutionManagement { repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS); repositories { google(); mavenCentral() } }
@@ -67,7 +86,7 @@ jobs:
           GRADLE
           cat > app/src/main/AndroidManifest.xml <<'XML'
           <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-              <application android:theme="@android:style/Theme.Material.Light.NoActionBar" android:label="سفرلندالبرز" android:usesCleartextTraffic="false">
+              <application android:theme="@android:style/Theme.Material.Light.NoActionBar" android:label="سفرلندالبرز" android:icon="@drawable/safarland_logo" android:usesCleartextTraffic="false">
                   <activity android:name=".MainActivity" android:exported="true">
                       <intent-filter>
                           <action android:name="android.intent.action.MAIN" />
@@ -85,6 +104,8 @@ jobs:
           import androidx.activity.compose.setContent
           import androidx.compose.foundation.background
           import androidx.compose.foundation.layout.*
+          import androidx.compose.foundation.Image
+          import androidx.compose.ui.res.painterResource
           import androidx.compose.foundation.rememberScrollState
           import androidx.compose.foundation.verticalScroll
           import androidx.compose.material3.*
@@ -120,6 +141,8 @@ jobs:
               var adminPrice by remember { mutableStateOf("") }
               MaterialTheme(colorScheme = lightColorScheme(primary = Ink, secondary = Gold, background = Cream)) {
                   Column(Modifier.fillMaxSize().background(Cream).verticalScroll(rememberScrollState()).padding(20.dp)) {
+                      Image(painter = painterResource(R.drawable.safarland_logo), contentDescription = "لوگوی سفرلندالبرز", modifier = Modifier.size(132.dp).align(Alignment.CenterHorizontally))
+                      Spacer(Modifier.height(8.dp))
                       Text("سفرلندالبرز", fontSize = 29.sp, fontWeight = FontWeight.Bold, color = Ink, modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center)
                       Text("تاکسی اینترنتی بین‌شهری", color = Gold, modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center)
                       Spacer(Modifier.height(22.dp))
