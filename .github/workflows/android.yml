@@ -86,7 +86,7 @@ jobs:
           GRADLE
           cat > app/src/main/AndroidManifest.xml <<'XML'
           <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-              <application android:theme="@android:style/Theme.Material.Light.NoActionBar" android:label="سفرلندالبرز" android:icon="@drawable/safarland_logo" android:usesCleartextTraffic="false">
+              <application android:theme="@android:style/Theme.Material.Light.NoActionBar" android:label="سفرلندالبرز" android:icon="@drawable/safarland_icon" android:usesCleartextTraffic="false">
                   <activity android:name=".MainActivity" android:exported="true">
                       <intent-filter>
                           <action android:name="android.intent.action.MAIN" />
@@ -141,7 +141,7 @@ jobs:
               var adminPrice by remember { mutableStateOf("") }
               MaterialTheme(colorScheme = lightColorScheme(primary = Ink, secondary = Gold, background = Cream)) {
                   Column(Modifier.fillMaxSize().background(Cream).verticalScroll(rememberScrollState()).padding(20.dp)) {
-                      Image(painter = painterResource(R.drawable.safarland_logo), contentDescription = "لوگوی سفرلندالبرز", modifier = Modifier.size(132.dp).align(Alignment.CenterHorizontally))
+                      Image(painter = painterResource(R.drawable.safarland_icon), contentDescription = "لوگوی اصلی سفرلندالبرز", modifier = Modifier.size(132.dp).align(Alignment.CenterHorizontally))
                       Spacer(Modifier.height(8.dp))
                       Text("سفرلندالبرز", fontSize = 29.sp, fontWeight = FontWeight.Bold, color = Ink, modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center)
                       Text("تاکسی اینترنتی بین‌شهری", color = Gold, modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center)
