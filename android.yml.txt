@@ -1,0 +1,167 @@
+name: Build Safarland Alborz APK
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create Android project
+        run: |
+          mkdir -p app/src/main/java/com/safarland/alborz app/src/main/res/values
+          cat > settings.gradle.kts <<'GRADLE'
+          pluginManagement { repositories { google(); mavenCentral(); gradlePluginPortal() } }
+          dependencyResolutionManagement { repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS); repositories { google(); mavenCentral() } }
+          rootProject.name = "SafarlandAlborz"
+          include(":app")
+          GRADLE
+          cat > build.gradle.kts <<'GRADLE'
+          plugins {
+              id("com.android.application") version "8.7.3" apply false
+              id("org.jetbrains.kotlin.android") version "2.0.21" apply false
+              id("org.jetbrains.kotlin.plugin.compose") version "2.0.21" apply false
+          }
+          GRADLE
+          cat > gradle.properties <<'PROPS'
+          org.gradle.jvmargs=-Xmx3g -Dfile.encoding=UTF-8
+          android.useAndroidX=true
+          kotlin.code.style=official
+          PROPS
+          cat > app/build.gradle.kts <<'GRADLE'
+          plugins {
+              id("com.android.application")
+              id("org.jetbrains.kotlin.android")
+              id("org.jetbrains.kotlin.plugin.compose")
+          }
+          android {
+              namespace = "com.safarland.alborz"
+              compileSdk = 35
+              defaultConfig {
+                  applicationId = "com.safarland.alborz"
+                  minSdk = 23
+                  targetSdk = 35
+                  versionCode = 1
+                  versionName = "1.0"
+              }
+              buildFeatures { compose = true }
+          }
+          dependencies {
+              implementation(platform("androidx.compose:compose-bom:2024.12.01"))
+              implementation("androidx.activity:activity-compose:1.10.0")
+              implementation("androidx.compose.ui:ui")
+              implementation("androidx.compose.ui:ui-tooling-preview")
+              implementation("androidx.compose.material3:material3")
+              implementation("androidx.compose.material:material-icons-extended")
+              implementation("androidx.navigation:navigation-compose:2.8.5")
+          }
+          GRADLE
+          cat > app/src/main/AndroidManifest.xml <<'XML'
+          <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+              <application android:theme="@android:style/Theme.Material.Light.NoActionBar" android:label="سفرلندالبرز" android:usesCleartextTraffic="false">
+                  <activity android:name=".MainActivity" android:exported="true">
+                      <intent-filter>
+                          <action android:name="android.intent.action.MAIN" />
+                          <category android:name="android.intent.category.LAUNCHER" />
+                      </intent-filter>
+                  </activity>
+              </application>
+          </manifest>
+          XML
+          cat > app/src/main/java/com/safarland/alborz/MainActivity.kt <<'KOTLIN'
+          package com.safarland.alborz
+
+          import android.os.Bundle
+          import androidx.activity.ComponentActivity
+          import androidx.activity.compose.setContent
+          import androidx.compose.foundation.background
+          import androidx.compose.foundation.layout.*
+          import androidx.compose.foundation.rememberScrollState
+          import androidx.compose.foundation.verticalScroll
+          import androidx.compose.material3.*
+          import androidx.compose.runtime.*
+          import androidx.compose.ui.Alignment
+          import androidx.compose.ui.Modifier
+          import androidx.compose.ui.graphics.Color
+          import androidx.compose.ui.text.font.FontWeight
+          import androidx.compose.ui.text.style.TextAlign
+          import androidx.compose.ui.unit.dp
+          import androidx.compose.ui.unit.sp
+
+          private val Gold = Color(0xFFC6A45A)
+          private val Ink = Color(0xFF171717)
+          private val Cream = Color(0xFFF8F6F0)
+
+          class MainActivity : ComponentActivity() {
+              override fun onCreate(savedInstanceState: Bundle?) {
+                  super.onCreate(savedInstanceState)
+                  setContent { SafarlandApp() }
+              }
+          }
+
+          @Composable
+          fun SafarlandApp() {
+              var page by remember { mutableStateOf("passenger") }
+              var origin by remember { mutableStateOf("") }
+              var destination by remember { mutableStateOf("") }
+              var date by remember { mutableStateOf("") }
+              var phone by remember { mutableStateOf("") }
+              var payment by remember { mutableStateOf("نقدی") }
+              var submitted by remember { mutableStateOf(false) }
+              var adminPrice by remember { mutableStateOf("") }
+              MaterialTheme(colorScheme = lightColorScheme(primary = Ink, secondary = Gold, background = Cream)) {
+                  Column(Modifier.fillMaxSize().background(Cream).verticalScroll(rememberScrollState()).padding(20.dp)) {
+                      Text("سفرلندالبرز", fontSize = 29.sp, fontWeight = FontWeight.Bold, color = Ink, modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center)
+                      Text("تاکسی اینترنتی بین‌شهری", color = Gold, modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center)
+                      Spacer(Modifier.height(22.dp))
+                      Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                          Button(onClick = { page = "passenger" }, modifier = Modifier.weight(1f), colors = ButtonDefaults.buttonColors(containerColor = if (page == "passenger") Ink else Color.LightGray)) { Text("مسافران") }
+                          Button(onClick = { page = "admin" }, modifier = Modifier.weight(1f), colors = ButtonDefaults.buttonColors(containerColor = if (page == "admin") Ink else Color.LightGray)) { Text("مدیریت") }
+                      }
+                      Spacer(Modifier.height(18.dp))
+                      if (page == "passenger") {
+                          Text("درخواست سفر", fontSize = 22.sp, fontWeight = FontWeight.Bold, color = Ink)
+                          OutlinedTextField(origin, { origin = it }, label = { Text("مبدا") }, modifier = Modifier.fillMaxWidth())
+                          OutlinedTextField(destination, { destination = it }, label = { Text("مقصد") }, modifier = Modifier.fillMaxWidth())
+                          OutlinedTextField(date, { date = it }, label = { Text("تاریخ و ساعت سفر") }, modifier = Modifier.fillMaxWidth())
+                          OutlinedTextField(phone, { phone = it }, label = { Text("شماره تماس") }, modifier = Modifier.fillMaxWidth())
+                          Spacer(Modifier.height(10.dp))
+                          Text("روش پرداخت", fontWeight = FontWeight.Bold)
+                          Row(verticalAlignment = Alignment.CenterVertically) {
+                              RadioButton(payment == "نقدی", { payment = "نقدی" }); Text("نقدی")
+                              Spacer(Modifier.width(18.dp))
+                              RadioButton(payment == "آنلاین", { payment = "آنلاین" }); Text("آنلاین")
+                          }
+                          Button(onClick = { submitted = true }, modifier = Modifier.fillMaxWidth(), colors = ButtonDefaults.buttonColors(containerColor = Gold)) { Text("ثبت درخواست سفر", color = Ink) }
+                          if (submitted) Text("درخواست شما در این نسخه نمایشی ثبت محلی نشده است. برای دریافت سفر، سامانه باید به سرور متصل شود.", color = Ink)
+                      } else {
+                          Text("پنل مدیریت", fontSize = 22.sp, fontWeight = FontWeight.Bold, color = Ink)
+                          Text("قیمت سفر توسط مدیر تعیین می‌شود.")
+                          OutlinedTextField(adminPrice, { adminPrice = it }, label = { Text("قیمت پیشنهادی سفر (تومان)") }, modifier = Modifier.fillMaxWidth())
+                          Text("این صفحه فعلاً نمایشی است و ورود امن مدیر و ذخیره درخواست‌ها هنوز پیاده‌سازی نشده است.", color = Color.DarkGray)
+                      }
+                      Spacer(Modifier.height(28.dp))
+                      HorizontalDivider(color = Gold)
+                      Spacer(Modifier.height(12.dp))
+                      Text("وب‌سایت: www.safarlandalborz.com", color = Ink, modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center)
+                      Text("سفر مطمئن، انتخاب هوشمندانه", color = Gold, modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center)
+                  }
+              }
+          }
+          KOTLIN
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+      - name: Build debug APK
+        run: gradle assembleDebug
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: SafarlandAlborz-APK
+          path: app/build/outputs/apk/debug/app-debug.apk
